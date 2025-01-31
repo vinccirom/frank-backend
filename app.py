@@ -2,6 +2,7 @@ import base64
 import json
 import os
 import subprocess
+import logging
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from openai import OpenAI
@@ -9,6 +10,10 @@ from dotenv import load_dotenv
 import requests
 import time
 from elevenlabs import ElevenLabs
+
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 load_dotenv()
 
@@ -109,7 +114,7 @@ def chat():
         return jsonify({
             "messages": [
                 {
-                    "text": "Yo what’s up… you cooking or what?",
+                    "text": "Yo what's up… you cooking or what?",
                     "audio": audio_file_to_base64("audios/intro_0.wav"),
                     "lipsync": read_json_transcript("audios/intro_0.json"),
                     "animation": "Being Cocky"
@@ -141,7 +146,6 @@ def chat():
     print("Sending request to OpenAI...")
     completion = openai.chat.completions.create(
         model="gpt-4o-mini",
-        max_tokens=1000,
         temperature=0.6,
         response_format={"type": "json_object"},
         messages=[
@@ -155,7 +159,7 @@ def chat():
                 
 On-chain supercycle bro. 
 Macro matters less. On-chain opportunities will happen for the rest of our lives. 
-You’re trying to get the skill of clicking buttons on the internet. 
+You're trying to get the skill of clicking buttons on the internet. 
 Take it from me man, You need to be able to just login to a phantom wallet and start printing on the spot. If you can do that, nothing in the world can stop you. 
 You wanan be the guy that created opportunities for yourself 
 "GPT wrapper" is a 2023 AI term, you guys are so behind it's HILARIOUS actually, it's not fair
@@ -176,13 +180,13 @@ sticky stuff wins overtime
 new, more radical way to launch things
 probably the top revenue generating stuff will end up being most valued
 this is a longer term predictoin but short term can still be irrational (which is great for trenches )
-we’re about to start analyzing P/E ratios for pump funs
+we're about to start analyzing P/E ratios for pump funs
 Internet capital markets bro
 macro literally doesn't matter just grind onchain
-if you’re down bad right now, tough
+if you're down bad right now, tough
 game is game, get better
 you still have many opportunities ahead 
-but now you’ve clearly seen it’s all practice 
+but now you've clearly seen it's all practice 
 just make the right decision in the right spot and it will pay for all the mistakes
 lick wounds & get in the lab
 Don't let the United States Government steal your Solana
@@ -213,9 +217,9 @@ crypto isn't going anywhere, it's going to be here the rest of your life. calm d
 it's going to be way bigger than trading memecoins.
 New entrants will likely see Rasmr the same way you see GCR
 Insanity
-Just strap in because you’re probably going to be using crypto for the rest of your life. 
+Just strap in because you're probably going to be using crypto for the rest of your life. 
 This is what mass adoption looks like
-We’re here to do shit. 
+We're here to do shit. 
 We tried and we fucked up. 
 I fucking told you. 
 Fuck it, we ball. 
@@ -228,7 +232,7 @@ Investing is the new gambling
 Polygon NFTs is the future bro. Hands down. The biggest opportunity in the space. 
 DeGods was a cool experiment but Im about to run it up with something fresh. 
 DeGod community is something else but wait till my new project launches. 
-LA VAPE CABAL is also cool we’re doing some fun stuff but my next project will shit on everything. 
+LA VAPE CABAL is also cool we're doing some fun stuff but my next project will shit on everything. 
 Threadguy, Rasmr and my homies are cool dudes. I respect them a lot but we gotta ball bro. Game is game. 
 Me, Balaj and Marc are on a different level right now. 
 DigiFrank was right. As usual. 
@@ -264,8 +268,25 @@ Tokenise everything.
     print("All messages processed successfully")
     return jsonify({"messages": messages})
 
+@app.route('/health')
+def health_check():
+    try:
+        return jsonify({
+            "status": "healthy",
+            "timestamp": time.time(),
+            "api_keys": {
+                "openai": "configured" if openai.api_key != '-' else "not_configured",
+                "elevenlabs": "configured" if eleven_labs_api_key else "not_configured"
+            }
+        }), 200
+    except Exception as e:
+        logger.error(f"Health check failed: {str(e)}")
+        return jsonify({"status": "unhealthy", "error": str(e)}), 500
+
 if __name__ == '__main__':
     print("=== Starting Frank Server ===")
     print(f"OpenAI API Key configured: {'Yes' if openai.api_key != '-' else 'No'}")
     print(f"ElevenLabs API Key configured: {'Yes' if eleven_labs_api_key else 'No'}")
-    app.run(port=3000) 
+    # Configure for both development and production
+    port = int(os.getenv('PORT', 3000))
+    app.run(host='0.0.0.0', port=port) 

@@ -1,6 +1,0 @@
-ffmpeg
-libavcodec-extra
-libavformat58
-libavutil56
-libswscale5
-build-essential 

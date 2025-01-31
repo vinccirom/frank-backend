@@ -283,10 +283,12 @@ def health_check():
         logger.error(f"Health check failed: {str(e)}")
         return jsonify({"status": "unhealthy", "error": str(e)}), 500
 
+# Move the startup logging outside the if block
+logger.info("=== Starting Frank Server ===")
+logger.info(f"OpenAI API Key configured: {'Yes' if openai.api_key != '-' else 'No'}")
+logger.info(f"ElevenLabs API Key configured: {'Yes' if eleven_labs_api_key else 'No'}")
+
 if __name__ == '__main__':
-    print("=== Starting Frank Server ===")
-    print(f"OpenAI API Key configured: {'Yes' if openai.api_key != '-' else 'No'}")
-    print(f"ElevenLabs API Key configured: {'Yes' if eleven_labs_api_key else 'No'}")
-    # Configure for both development and production
+    # Only run the development server when running the file directly
     port = int(os.getenv('PORT', 3000))
-    app.run(host='0.0.0.0', port=port) 
+    app.run(host='0.0.0.0', port=port, debug=False) 

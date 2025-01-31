@@ -6,8 +6,7 @@
   "type": "module",
   "scripts": {
     "start": "node index.js",
-    "dev": "nodemon index.js --ext js",
-    "prebuild": "curl -L https://johnvansickle.com/ffmpeg/releases/ffmpeg-release-amd64-static.tar.xz | tar xJ && mv ffmpeg-*-amd64-static/ffmpeg . && chmod +x ffmpeg"
+    "dev": "nodemon index.js --ext js"
   },
   "author": "Wawa SENSEI <contact@wawasensei.dev>",
   "dependencies": {

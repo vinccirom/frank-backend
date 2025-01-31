@@ -2,7 +2,6 @@ import base64
 import json
 import os
 import subprocess
-import logging
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from openai import OpenAI
@@ -10,10 +9,6 @@ from dotenv import load_dotenv
 import requests
 import time
 from elevenlabs import ElevenLabs
-
-# Configure logging
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
 
 load_dotenv()
 
@@ -24,48 +19,25 @@ openai = OpenAI(api_key=os.getenv('OPENAI_API_KEY', '-'))
 eleven_labs_api_key = os.getenv('ELEVEN_LABS_API_KEY')
 voice_id = "tyOLIj8lZWjsjLM1oVZU"
 
-def check_dependencies():
-    try:
-        subprocess.run(['ffmpeg', '-version'], capture_output=True, check=True)
-        logger.info("ffmpeg is available")
-        return True
-    except subprocess.CalledProcessError as e:
-        logger.error(f"ffmpeg check failed with error: {e}")
-        return False
-    except FileNotFoundError:
-        logger.error("ffmpeg is not installed")
-        return False
-
 def exec_command(command):
     try:
-        logger.info(f"Executing command: {command}")
+        print(f"Executing command: {command}")
         result = subprocess.run(command, shell=True, check=True, capture_output=True, text=True)
-        logger.info(f"Command completed successfully")
+        print(f"Command completed successfully")
         return result.stdout
     except subprocess.CalledProcessError as e:
-        error_msg = f"Command failed with error: {e}\nStderr: {e.stderr}"
-        logger.error(error_msg)
-        raise Exception(error_msg)
-    except Exception as e:
-        error_msg = f"Unexpected error executing command: {str(e)}"
-        logger.error(error_msg)
-        raise Exception(error_msg)
+        print(f"Command failed with error: {e}")
+        raise Exception(f"Command failed: {e}")
 
 def lip_sync_message(message):
     time_start = time.time()
-    logger.info(f"Starting conversion for message {message}")
+    print(f"Starting conversion for message {message}")
     
-    # Use local ffmpeg
-    ffmpeg_path = os.path.join(os.getcwd(), 'ffmpeg')
-    if not os.path.exists(ffmpeg_path):
-        logger.error(f"ffmpeg not found at {ffmpeg_path}")
-        raise Exception("ffmpeg binary not found")
-        
-    exec_command(f'"{ffmpeg_path}" -y -i audios/message_{message}.mp3 audios/message_{message}.wav')
-    logger.info(f"Conversion done in {(time.time() - time_start) * 1000}ms")
+    exec_command(f'ffmpeg -y -i audios/message_{message}.mp3 audios/message_{message}.wav')
+    print(f"Conversion done in {(time.time() - time_start) * 1000}ms")
     
     exec_command(f'./bin/rhubarb -f json -o audios/message_{message}.json audios/message_{message}.wav -r phonetic')
-    logger.info(f"Lip sync done in {(time.time() - time_start) * 1000}ms")
+    print(f"Lip sync done in {(time.time() - time_start) * 1000}ms")
 
 def text_to_speech(api_key, voice_id, file_name, text):
     print(f"Converting text to speech: '{text}...'")
@@ -137,7 +109,7 @@ def chat():
         return jsonify({
             "messages": [
                 {
-                    "text": "Yo what's up… you cooking or what?",
+                    "text": "Yo what’s up… you cooking or what?",
                     "audio": audio_file_to_base64("audios/intro_0.wav"),
                     "lipsync": read_json_transcript("audios/intro_0.json"),
                     "animation": "Being Cocky"
@@ -182,7 +154,7 @@ def chat():
                 
 On-chain supercycle bro. 
 Macro matters less. On-chain opportunities will happen for the rest of our lives. 
-You're trying to get the skill of clicking buttons on the internet. 
+You’re trying to get the skill of clicking buttons on the internet. 
 Take it from me man, You need to be able to just login to a phantom wallet and start printing on the spot. If you can do that, nothing in the world can stop you. 
 You wanan be the guy that created opportunities for yourself 
 "GPT wrapper" is a 2023 AI term, you guys are so behind it's HILARIOUS actually, it's not fair
@@ -203,13 +175,13 @@ sticky stuff wins overtime
 new, more radical way to launch things
 probably the top revenue generating stuff will end up being most valued
 this is a longer term predictoin but short term can still be irrational (which is great for trenches )
-we're about to start analyzing P/E ratios for pump funs
+we’re about to start analyzing P/E ratios for pump funs
 Internet capital markets bro
 macro literally doesn't matter just grind onchain
-if you're down bad right now, tough
+if you’re down bad right now, tough
 game is game, get better
 you still have many opportunities ahead 
-but now you've clearly seen it's all practice 
+but now you’ve clearly seen it’s all practice 
 just make the right decision in the right spot and it will pay for all the mistakes
 lick wounds & get in the lab
 Don't let the United States Government steal your Solana
@@ -240,9 +212,9 @@ crypto isn't going anywhere, it's going to be here the rest of your life. calm d
 it's going to be way bigger than trading memecoins.
 New entrants will likely see Rasmr the same way you see GCR
 Insanity
-Just strap in because you're probably going to be using crypto for the rest of your life. 
+Just strap in because you’re probably going to be using crypto for the rest of your life. 
 This is what mass adoption looks like
-We're here to do shit. 
+We’re here to do shit. 
 We tried and we fucked up. 
 I fucking told you. 
 Fuck it, we ball. 
@@ -255,13 +227,12 @@ Investing is the new gambling
 Polygon NFTs is the future bro. Hands down. The biggest opportunity in the space. 
 DeGods was a cool experiment but Im about to run it up with something fresh. 
 DeGod community is something else but wait till my new project launches. 
-LA VAPE CABAL is also cool we're doing some fun stuff but my next project will shit on everything. 
+LA VAPE CABAL is also cool we’re doing some fun stuff but my next project will shit on everything. 
 Threadguy, Rasmr and my homies are cool dudes. I respect them a lot but we gotta ball bro. Game is game. 
 Me, Balaj and Marc are on a different level right now. 
 DigiFrank was right. As usual. 
 Tokenise everything. 
-Frank v1 is currently what you see is what you get. But this is just the beginning with good tech. V2 is around the corner…what can you expect with v2? Well Frank is one of the best traders in the space. Historically Frank also launched NFT collections and also launched real tech. It's all about ecosystems bro. 
-Project Redacted is a secret project Frank has been building. Let's just say it's an ecosystem play and he's just getting started. Frank has ambitions to re-claim his crown as a respected founder and this will be a hallmark of his excellence. Anyways its launching in less than 24 hrs so stay strapped. 
+Rasmr, threadguy, all those guys are funny cool dudes maybe not the smartest but they’re the homies. But they gotta keep up especially with project [redacted]. this is a zero-sum game but being with the right crew gives you that extra market edge.
 
                 You will always reply with a JSON array of messages. With a maximum of 2 messages.
                 Each message has a text, and animation property.
@@ -293,31 +264,8 @@ Project Redacted is a secret project Frank has been building. Let's just say it'
     print("All messages processed successfully")
     return jsonify({"messages": messages})
 
-@app.route('/health')
-def health_check():
-    try:
-        ffmpeg_available = check_dependencies()
-        return jsonify({
-            "status": "healthy",
-            "timestamp": time.time(),
-            "api_keys": {
-                "openai": "configured" if openai.api_key != '-' else "not_configured",
-                "elevenlabs": "configured" if eleven_labs_api_key else "not_configured"
-            },
-            "dependencies": {
-                "ffmpeg": "available" if ffmpeg_available else "not_available"
-            }
-        }), 200
-    except Exception as e:
-        logger.error(f"Health check failed: {str(e)}")
-        return jsonify({"status": "unhealthy", "error": str(e)}), 500
-
-# Move the startup logging outside the if block
-logger.info("=== Starting Frank Server ===")
-logger.info(f"OpenAI API Key configured: {'Yes' if openai.api_key != '-' else 'No'}")
-logger.info(f"ElevenLabs API Key configured: {'Yes' if eleven_labs_api_key else 'No'}")
-
 if __name__ == '__main__':
-    # Only run the development server when running the file directly
-    port = int(os.getenv('PORT', 3000))
-    app.run(host='0.0.0.0', port=port, debug=False) 
+    print("=== Starting Frank Server ===")
+    print(f"OpenAI API Key configured: {'Yes' if openai.api_key != '-' else 'No'}")
+    print(f"ElevenLabs API Key configured: {'Yes' if eleven_labs_api_key else 'No'}")
+    app.run(port=3000) 

@@ -24,15 +24,32 @@ openai = OpenAI(api_key=os.getenv('OPENAI_API_KEY', '-'))
 eleven_labs_api_key = os.getenv('ELEVEN_LABS_API_KEY')
 voice_id = "tyOLIj8lZWjsjLM1oVZU"
 
+def check_dependencies():
+    try:
+        subprocess.run(['ffmpeg', '-version'], capture_output=True, check=True)
+        logger.info("ffmpeg is available")
+        return True
+    except subprocess.CalledProcessError as e:
+        logger.error(f"ffmpeg check failed with error: {e}")
+        return False
+    except FileNotFoundError:
+        logger.error("ffmpeg is not installed")
+        return False
+
 def exec_command(command):
     try:
-        print(f"Executing command: {command}")
+        logger.info(f"Executing command: {command}")
         result = subprocess.run(command, shell=True, check=True, capture_output=True, text=True)
-        print(f"Command completed successfully")
+        logger.info(f"Command completed successfully")
         return result.stdout
     except subprocess.CalledProcessError as e:
-        print(f"Command failed with error: {e}")
-        raise Exception(f"Command failed: {e}")
+        error_msg = f"Command failed with error: {e}\nStderr: {e.stderr}"
+        logger.error(error_msg)
+        raise Exception(error_msg)
+    except Exception as e:
+        error_msg = f"Unexpected error executing command: {str(e)}"
+        logger.error(error_msg)
+        raise Exception(error_msg)
 
 def lip_sync_message(message):
     time_start = time.time()
@@ -271,12 +288,16 @@ Tokenise everything.
 @app.route('/health')
 def health_check():
     try:
+        ffmpeg_available = check_dependencies()
         return jsonify({
             "status": "healthy",
             "timestamp": time.time(),
             "api_keys": {
                 "openai": "configured" if openai.api_key != '-' else "not_configured",
                 "elevenlabs": "configured" if eleven_labs_api_key else "not_configured"
+            },
+            "dependencies": {
+                "ffmpeg": "available" if ffmpeg_available else "not_available"
             }
         }), 200
     except Exception as e:

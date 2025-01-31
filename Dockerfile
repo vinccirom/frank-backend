@@ -16,9 +16,6 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy the rest of the application
 COPY . .
 
-# Create audios directory
-RUN mkdir -p audios
-
 # Make sure the bin/rhubarb is executable
 RUN chmod +x bin/rhubarb
 

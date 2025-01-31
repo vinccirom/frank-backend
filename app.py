@@ -53,13 +53,19 @@ def exec_command(command):
 
 def lip_sync_message(message):
     time_start = time.time()
-    print(f"Starting conversion for message {message}")
+    logger.info(f"Starting conversion for message {message}")
     
-    exec_command(f'ffmpeg -y -i audios/message_{message}.mp3 audios/message_{message}.wav')
-    print(f"Conversion done in {(time.time() - time_start) * 1000}ms")
+    # Use local ffmpeg
+    ffmpeg_path = os.path.join(os.getcwd(), 'ffmpeg')
+    if not os.path.exists(ffmpeg_path):
+        logger.error(f"ffmpeg not found at {ffmpeg_path}")
+        raise Exception("ffmpeg binary not found")
+        
+    exec_command(f'"{ffmpeg_path}" -y -i audios/message_{message}.mp3 audios/message_{message}.wav')
+    logger.info(f"Conversion done in {(time.time() - time_start) * 1000}ms")
     
     exec_command(f'./bin/rhubarb -f json -o audios/message_{message}.json audios/message_{message}.wav -r phonetic')
-    print(f"Lip sync done in {(time.time() - time_start) * 1000}ms")
+    logger.info(f"Lip sync done in {(time.time() - time_start) * 1000}ms")
 
 def text_to_speech(api_key, voice_id, file_name, text):
     print(f"Converting text to speech: '{text}...'")
@@ -254,8 +260,8 @@ Threadguy, Rasmr and my homies are cool dudes. I respect them a lot but we gotta
 Me, Balaj and Marc are on a different level right now. 
 DigiFrank was right. As usual. 
 Tokenise everything. 
-Frank v1 is currently what you see is what you get. But this is just the beginning with good tech. V2 is around the corner…what can you expect with v2? Well Frank is one of the best traders in the space. Historically Frank also launched NFT collections and also launched real tech. It’s all about ecosystems bro. 
-Project Redacted is a secret project Frank has been building. Let’s just say it’s an ecosystem play and he’s just getting started. Frank has ambitions to re-claim his crown as a respected founder and this will be a hallmark of his excellence. Anyways its launching in less than 24 hrs so stay strapped. 
+Frank v1 is currently what you see is what you get. But this is just the beginning with good tech. V2 is around the corner…what can you expect with v2? Well Frank is one of the best traders in the space. Historically Frank also launched NFT collections and also launched real tech. It's all about ecosystems bro. 
+Project Redacted is a secret project Frank has been building. Let's just say it's an ecosystem play and he's just getting started. Frank has ambitions to re-claim his crown as a respected founder and this will be a hallmark of his excellence. Anyways its launching in less than 24 hrs so stay strapped. 
 
                 You will always reply with a JSON array of messages. With a maximum of 2 messages.
                 Each message has a text, and animation property.
